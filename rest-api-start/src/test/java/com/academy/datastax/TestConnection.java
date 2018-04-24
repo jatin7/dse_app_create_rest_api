@@ -31,7 +31,7 @@ public class TestConnection {
     private String cassandraKeyspace;
     
     @Test
-    public void getConnectedKeySpace() {
+    public void checkConnection() {
         assertNotNull(cassandraKeyspace);
         assertNotNull(dseSession);
         assertEquals(cassandraKeyspace, dseSession.getLoggedKeyspace());

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.FileNotFoundException;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import com.datastax.driver.dse.DseSession;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes= { DseConfiguration.class })
 @TestPropertySource(locations = { "classpath:application-test.properties"})
-@Ignore
 public class TestConnection {
     
     @Autowired
@@ -62,6 +60,5 @@ public class TestConnection {
     public void testDropSchema() throws FileNotFoundException {
         DseUtils.executeCQLFile(dseSession, "/cql/drop-schema.cql");
     }
-   
 
 }

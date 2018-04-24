@@ -88,10 +88,13 @@ docker ps | grep datastax
 ### Setup studio
 
 * Connect to [Datastax Studio](http://localhost:9091)
-```
-- Edit connection to use hostname dse6 (and not 127.0.0.1)
-- Create a notebook "REST API"
-```
+
+* Edit connection to use hostname dse6 (and not 127.0.0.1)
+<img src="https://raw.githubusercontent.com/DataStax-Academy/tutorial-create-rest-api/master/img/studio-connection.png" width="500" />
+
+* Create a notebook "REST API"
+<img src="https://raw.githubusercontent.com/DataStax-Academy/tutorial-create-rest-api/master/img/studio-notebook.png" width="500" />
+
 
 * Test Connectivity
 ```sql

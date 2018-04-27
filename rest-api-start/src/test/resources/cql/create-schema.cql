@@ -1,25 +1,31 @@
-CREATE KEYSPACE IF NOT EXISTS demo 
-WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
+DROP KEYSPACE IF EXISTS tuto_rest_api;
 
-use demo;
+CREATE KEYSPACE tuto_rest_api 
+WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
 
-CREATE TABLE IF NOT EXISTS comments_by_video (
+use tuto_rest_api;
+
+DROP TABLE IF EXISTS comments_by_video;
+CREATE TABLE comments_by_video (
     videoid uuid,
     commentid timeuuid,
     userid uuid,
     comment text,
-    PRIMARY KEY (videoid, commentid)
+    PRIMARY KEY ((videoid), commentid)
 ) WITH CLUSTERING ORDER BY (commentid DESC);
-
-truncate comments_by_video;
 
 CREATE TABLE IF NOT EXISTS comments_by_user (
     userid uuid,
     commentid timeuuid,
     videoid uuid,
     comment text,
-    PRIMARY KEY (userid, commentid)
+    PRIMARY KEY ((userid), commentid)
 ) WITH CLUSTERING ORDER BY (commentid DESC);
 
+
 truncate comments_by_user;
+
+
+
+
 

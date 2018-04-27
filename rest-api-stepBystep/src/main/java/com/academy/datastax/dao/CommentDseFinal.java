@@ -44,7 +44,7 @@ import com.google.common.util.concurrent.Futures;
  * @author DataStax Evangelist Team
  */
 @Repository
-public class CommentDseCrudRepositoryZZZ {
+public class CommentDseFinal {
     
     /** Hold Connectivity to DSE. */
     protected DseSession dseSession;
@@ -64,7 +64,7 @@ public class CommentDseCrudRepositoryZZZ {
     
     /** Default Constructor. */
     @Autowired
-    public CommentDseCrudRepositoryZZZ(DseSession dseSession, MappingManager mappingManager) {
+    public CommentDseFinal(DseSession dseSession, MappingManager mappingManager) {
         this.dseSession     = dseSession;
         this.mappingManager = mappingManager;
         //prepare();

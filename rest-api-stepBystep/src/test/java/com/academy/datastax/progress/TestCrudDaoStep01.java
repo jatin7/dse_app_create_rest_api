@@ -1,4 +1,4 @@
-package com.academy.datastax;
+package com.academy.datastax.progress;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,9 +37,9 @@ public class TestCrudDaoStep01 {
         
         assertEquals(comment, 
         dseSession.execute(""
-                + "SELECT * FROM comments_by_user "
-                + "WHERE commentid = 1aae5f50-445e-11e8-8977-abaff7c8fa1d "
-                + "AND userid = b17e0fa3-62f7-47f6-a47a-552c925d4d79;")
+                + "SELECT * FROM comments_by_user"
+                + " WHERE commentid =  " + commentId
+                + " AND userid = " + userid + ";")
                   .all().stream().findFirst().get().getString("comment"));
     }
 

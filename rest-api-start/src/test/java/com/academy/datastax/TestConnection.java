@@ -36,6 +36,18 @@ public class TestConnection {
     }
     
     @Test
+    public void select() {
+        dseSession.execute("SELECT comment FROM comments_by_user")
+                  .all().stream()
+                  .forEach(row -> System.out.println("- " + row.getString("comment")));
+    }
+    
+    @Test
+    public void testDropSchema() throws FileNotFoundException {
+        DseUtils.executeCQLFile(dseSession, "/cql/drop-schema.cql");
+    }
+    
+    @Test
     public void testCreateSchema() throws FileNotFoundException {
         DseUtils.executeCQLFile(dseSession, "/cql/create-schema.cql");
     }
@@ -56,9 +68,5 @@ public class TestConnection {
                   .all().stream().findFirst().get().getString("comment"));
     }
     
-    @Test
-    public void testDropSchema() throws FileNotFoundException {
-        DseUtils.executeCQLFile(dseSession, "/cql/drop-schema.cql");
-    }
-
+  
 }

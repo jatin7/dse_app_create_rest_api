@@ -1,9 +1,9 @@
-CREATE KEYSPACE IF NOT EXISTS demo WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
+CREATE KEYSPACE IF NOT EXISTS demo 
+WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
 
 use demo;
 
-// Comments for a given video
-CREATE TABLE IF NOT EXISTS demo.comments_by_video (
+CREATE TABLE IF NOT EXISTS comments_by_video (
     videoid uuid,
     commentid timeuuid,
     userid uuid,
@@ -11,8 +11,9 @@ CREATE TABLE IF NOT EXISTS demo.comments_by_video (
     PRIMARY KEY (videoid, commentid)
 ) WITH CLUSTERING ORDER BY (commentid DESC);
 
-// Comments for a given user
-CREATE TABLE IF NOT EXISTS demo.comments_by_user (
+truncate comments_by_video;
+
+CREATE TABLE IF NOT EXISTS comments_by_user (
     userid uuid,
     commentid timeuuid,
     videoid uuid,
@@ -20,4 +21,5 @@ CREATE TABLE IF NOT EXISTS demo.comments_by_user (
     PRIMARY KEY (userid, commentid)
 ) WITH CLUSTERING ORDER BY (commentid DESC);
 
+truncate comments_by_user;
 

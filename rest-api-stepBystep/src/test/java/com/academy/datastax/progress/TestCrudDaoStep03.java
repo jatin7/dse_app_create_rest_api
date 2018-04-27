@@ -1,4 +1,4 @@
-package com.academy.datastax;
+package com.academy.datastax.progress;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -1,7 +1,7 @@
-CREATE KEYSPACE IF NOT EXISTS demo 
-WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
+CREATE KEYSPACE IF NOT EXISTS tuto_rest_api 
+WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
 
-use demo;
+use tuto_rest_api;
 
 CREATE TABLE IF NOT EXISTS comments_by_video (
     videoid uuid,

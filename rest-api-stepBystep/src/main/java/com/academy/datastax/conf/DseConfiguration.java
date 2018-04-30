@@ -11,6 +11,7 @@ import com.datastax.driver.dse.DseCluster;
 import com.datastax.driver.dse.DseCluster.Builder;
 import com.datastax.driver.dse.DseSession;
 import com.datastax.driver.dse.auth.DsePlainTextAuthProvider;
+import com.datastax.driver.mapping.MappingManager;
 
 /**
  * Connectivity to DSE.
@@ -43,10 +44,15 @@ public class DseConfiguration {
     @Bean
     public DseSession dseSession(
             DseCluster dseCluster, 
-            @Value("${dse.cassandra.keyspace: demo}") String cassandraKeyspace) {
+            @Value("${dse.cassandra.keyspace:tuto_rest_api}") String cassandraKeyspace) {
         final DseSession session = dseCluster.connect();
         DseUtils.createKeySpaceSimpleStrategy(session, cassandraKeyspace, 3);
         return session;
+    }
+    
+    @Bean
+    public MappingManager mappingManager(DseSession dseSession) {
+        return new MappingManager(dseSession);
     }
     
 }

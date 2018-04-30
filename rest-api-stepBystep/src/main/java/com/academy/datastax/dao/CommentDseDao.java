@@ -1,5 +1,8 @@
 package com.academy.datastax.dao;
 
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -18,8 +21,10 @@ import com.academy.datastax.utils.DseUtils;
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PagingState;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.dse.DseSession;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
@@ -33,7 +38,7 @@ import com.google.common.util.concurrent.Futures;
  * @author DataStax Evangelist Team
  */
 @Repository
-public class CommentDao09_Final {
+public class CommentDseDao {
     
     /** Internal logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(DseUtils.class);
@@ -45,12 +50,14 @@ public class CommentDao09_Final {
     protected MappingManager mappingManager;
     
     /** Mapper to ease queries. */
-    protected Mapper < CommentByUser >  mapperCommentByUser;
-    protected Mapper < CommentByVideo > mapperCommentByVideo;
+    private Mapper < CommentByUser >  mapperCommentByUser;
+    private Mapper < CommentByVideo > mapperCommentByVideo;
+    private PreparedStatement readAllCommentUserStatement;
+    private PreparedStatement readAllCommentVideoStatement;
     
     /** Default Constructor. */
     @Autowired
-    public CommentDao09_Final(DseSession dseSession, MappingManager mappingManager) {
+    public CommentDseDao(DseSession dseSession, MappingManager mappingManager) {
         this.dseSession     = dseSession;
         this.mappingManager = mappingManager;
         prepare();
@@ -60,6 +67,16 @@ public class CommentDao09_Final {
     public void prepare() {
         mapperCommentByUser  = mappingManager.mapper(CommentByUser.class);
         mapperCommentByVideo = mappingManager.mapper(CommentByVideo.class);
+        
+        // Query on Partition key only (not the whole primary key)
+        String tableCommentByUser = mapperCommentByUser.getTableMetadata().getName();
+        readAllCommentUserStatement = dseSession.prepare(select().all()
+                .from(tableCommentByUser).where(eq(Comment.COLUMN_USERID,  QueryBuilder.bindMarker())));
+
+        // Query on Partition key only (not the whole primary key)
+        String tableCommentByVideo = mapperCommentByVideo.getTableMetadata().getName();
+        readAllCommentVideoStatement = dseSession.prepare(select().all()
+                .from(tableCommentByVideo).where(eq(Comment.COLUMN_VIDEOID,  QueryBuilder.bindMarker())));
     }
     
     /*
@@ -137,7 +154,7 @@ public class CommentDao09_Final {
     public ResultPage < CommentByVideo > readVideoComments(UUID videoid, Optional<String> pagingState,  Optional<Integer> pageSize) {
         Assert.notNull(videoid, "videoid is required to create a comment");
         // Build Query
-        Statement query = mapperCommentByVideo.getQuery(videoid);
+        Statement query = readAllCommentVideoStatement.bind().setUUID(Comment.COLUMN_VIDEOID, videoid);
         pageSize.ifPresent(query::setFetchSize);
         pagingState.ifPresent(ps -> query.setPagingState(PagingState.fromString(ps)));
         if (LOGGER.isDebugEnabled()) {
@@ -162,7 +179,7 @@ public class CommentDao09_Final {
     public ResultPage < CommentByUser > readUserComments(UUID userid, Optional<String> pagingState, Optional<Integer> pageSize) {
         Assert.notNull(userid, "userid is required to create a comment");
         // Build Query
-        Statement query = mapperCommentByUser.getQuery(userid);
+        Statement query = readAllCommentUserStatement.bind().setUUID(Comment.COLUMN_USERID, userid);
         pageSize.ifPresent(query::setFetchSize);
         pagingState.ifPresent(ps -> query.setPagingState(PagingState.fromString(ps)));
         if (LOGGER.isDebugEnabled()) {

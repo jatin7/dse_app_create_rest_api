@@ -12,9 +12,9 @@
 
 	<properties>
 		<version.dse-java-driver>1.5.1</version.dse-java-driver>
-		<version.spring>5.0.5.RELEASE</version.spring>
 		<version.logback>1.2.3</version.logback>
-		
+		<version.swagger>2.8.0</version.swagger>
+		<version.spring>5.0.5.RELEASE</version.spring>
 		<version.spring-boot>1.5.12.RELEASE</version.spring-boot>
 		<version.jupiter-unit>5.1.0</version.jupiter-unit>
 		<version.jupiter-platform>1.1.0</version.jupiter-platform>
@@ -22,18 +22,19 @@
 
 	<dependencies>
 	
+		<!-- Logging -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>${version.logback}</version>
 		</dependency>
-		
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 			<version>${version.logback}</version>
 		</dependency>
 	
+		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
@@ -90,12 +91,40 @@
 		</dependency>
 		 
 		<!-- API -->
+		
+		
+		<!-- REST with Spring -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-dependencies</artifactId>
 			<version>${version.spring-boot}</version>
 			<type>pom</type>
 			<scope>import</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<version>${version.spring-boot}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<version>${version.spring-boot}</version>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Swagger -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${version.swagger}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${version.swagger}</version>
 		</dependency>
 		
 	</dependencies>
@@ -129,6 +158,22 @@
 						<version>${junit-jupiter.version}</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${version.spring-boot}</version>
+				<configuration>
+					<mainClass>${start-class}</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>

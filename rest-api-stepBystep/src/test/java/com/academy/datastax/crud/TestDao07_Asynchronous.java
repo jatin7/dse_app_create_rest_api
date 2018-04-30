@@ -1,11 +1,7 @@
 package com.academy.datastax.crud;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -16,7 +12,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.academy.datastax.conf.DseConfiguration;
-import com.academy.datastax.dao.CommentDao03_PrepareStatement;
 import com.academy.datastax.dao.CommentDao08_Asynchronous;
 import com.academy.datastax.model.Comment;
 import com.datastax.driver.dse.DseSession;
@@ -60,6 +55,7 @@ public class TestDao07_Asynchronous {
                   .all().stream().findFirst().get().getString("comment"));
     }
     
+    /*
     @Test
     public void readOne() {
         Optional<String> com = dao.find(userid, commentId);
@@ -102,7 +98,6 @@ public class TestDao07_Asynchronous {
         dao.deleteComment(userid, commentId);
         List<String> listComments = dao.findByUserId(userid);
         assertTrue(listComments.isEmpty());
-    } 
-       
+    } */
                 
 }

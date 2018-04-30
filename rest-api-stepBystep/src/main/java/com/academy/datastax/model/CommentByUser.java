@@ -10,7 +10,7 @@ import com.datastax.driver.mapping.annotations.Table;
  *
  * @author DataStax evangelist team.
  */
-@Table(keyspace="demo", name="comments_by_user")
+@Table(keyspace=DseSchema.KEYSPACE, name=DseSchema.TABLENAME_COMMENTS_BY_USER)
 public class CommentByUser extends Comment {
     
     /** Serial. */

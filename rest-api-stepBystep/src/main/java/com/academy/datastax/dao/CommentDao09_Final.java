@@ -1,5 +1,7 @@
 package com.academy.datastax.dao;
 
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
@@ -11,14 +13,17 @@ import org.springframework.util.Assert;
 import com.academy.datastax.model.Comment;
 import com.academy.datastax.model.CommentByUser;
 import com.academy.datastax.model.CommentByVideo;
+import com.academy.datastax.model.ResultPage;
 import com.academy.datastax.utils.DseUtils;
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PagingState;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.dse.DseSession;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
+import com.datastax.driver.mapping.Result;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 
@@ -117,6 +122,63 @@ public class CommentDao09_Final {
         // Create batch and execute as a callback
         Futures.addCallback(dseSession.executeAsync(new BatchStatement().add(q1).add(q2)), myCallback);
         return cfv;
+    }
+    
+    /*
+     * PRODUCTION READY UPDATE
+     */
+    public CompletableFuture<Void> updateComment(final Comment c) {
+        return insertComment(c);
+    }
+    
+    /*
+     * PRODUCTION READY READ (video)
+     */
+    public ResultPage < CommentByVideo > readVideoComments(UUID videoid, Optional<String> pagingState, int pageSize) {
+        Assert.notNull(videoid, "videoid is required to create a comment");
+        // Build Query
+        Statement query = mapperCommentByVideo.getQuery(videoid);
+        query.setFetchSize(pageSize);
+        pagingState.ifPresent(ps -> query.setPagingState(PagingState.fromString(ps)));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("executing: {}", ((BoundStatement) query).preparedStatement().getQueryString());
+        }
+        // Execute Query
+        Result< CommentByVideo > result = mapperCommentByVideo.map(dseSession.execute(query));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Retrieving: {} comment(s)", result.getAvailableWithoutFetching());
+        }
+        // Create result page
+        ResultPage<CommentByVideo> resultPage = new ResultPage<>();
+        resultPage.setPageSize(pageSize);
+        resultPage.setNextPage(Optional.ofNullable(result.getExecutionInfo().getPagingState()).map(PagingState::toString));
+        resultPage.setresults(result.all());
+        return resultPage;
+    }
+    
+    /*
+     * PRODUCTION READY READ (user)
+     */
+    public ResultPage < CommentByUser > readUserComments(UUID userid, Optional<String> pagingState, int pageSize) {
+        Assert.notNull(userid, "userid is required to create a comment");
+        // Build Query
+        Statement query = mapperCommentByUser.getQuery(userid);
+        query.setFetchSize(pageSize);
+        pagingState.ifPresent(ps -> query.setPagingState(PagingState.fromString(ps)));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("executing: {}", ((BoundStatement) query).preparedStatement().getQueryString());
+        }
+        // Execute Query
+        Result< CommentByUser > result = mapperCommentByUser.map(dseSession.execute(query));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Retrieving: {} comment(s)", result.getAvailableWithoutFetching());
+        }
+        // Create result page
+        ResultPage<CommentByUser> resultPage = new ResultPage<>();
+        resultPage.setPageSize(pageSize);
+        resultPage.setNextPage(Optional.ofNullable(result.getExecutionInfo().getPagingState()).map(PagingState::toString));
+        resultPage.setresults(result.all());
+        return resultPage;
     }
     
 }

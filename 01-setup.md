@@ -50,29 +50,20 @@ You should be able to execute `docker -v`
 Docker version 18.03.0-ce, build 0520e24
 ```
 
-### Start Datastax Enterprise and Datastax Studio
+### Start DSE and Studio
 
-Datastax provides docker images on the [Dockerhub](https://hub.docker.com/u/datastax). This tutorial will use latest version of DSE and studio. At anytime you can download and use them in development. Production usages require licenses. Here the command to start the container on your station at anytime.
-```
-# do not execute those lines - only for explanation please use docker compose
-docker run -e "DS_LICENSE=accept" -it -d -p 9042:9042 --name dse6 datastax/dse-server
-docker run -e "DS_LICENSE=accept" -it -d -p 9091:9091 --link dse6:dse6 datastax/dse-studio
-```
-
-To ease development we will leverage on [Docker Compose](https://docs.docker.com/compose/) to start and link our containers :
-
-* Clone this repository 
+* Clone the tutorial repository 
 ```
 git clone https://github.com/DataStax-Academy/tutorial-create-rest-api.git
 cd tutorial-create-rest-api
 ```
 
-* Startup Studio and DSE using docker : 
+* Startup Studio and DSE using [Docker Compose](https://docs.docker.com/compose/) :
 ```
 docker-compose up -d
 ```
 
-Your should get output like
+Your should get output :
 ```
 cedricklunven@Cedricks-MBP:~/dev/workspace-misc/tutorial-create-rest-api> docker-compose up -d
 Creating network "tutorialcreaterestapi_default" with the default driver
@@ -84,6 +75,13 @@ To see your running containers :
 ```
 docker ps | grep datastax
 ```
+
+*Datastax provides docker images on the [Dockerhub](https://hub.docker.com/u/datastax). This tutorial will use latest version of DSE and studio. At anytime you can download and use them in development. Production usages require licenses. Here the commands to start the container on your station at anytime.*
+```
+docker run -e "DS_LICENSE=accept" -it -d -p 9042:9042 --name dse6 datastax/dse-server
+docker run -e "DS_LICENSE=accept" -it -d -p 9091:9091 --link dse6:dse6 datastax/dse-studio
+```
+
 
 ### Setup studio
 

@@ -16,8 +16,10 @@ import org.springframework.stereotype.Repository;
 import com.academy.datastax.model.Comment;
 import com.academy.datastax.model.CommentByUser;
 import com.academy.datastax.model.CommentByVideo;
+import com.academy.datastax.utils.DseUtils;
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.dse.DseSession;
 import com.datastax.driver.mapping.Mapper;
@@ -28,6 +30,7 @@ import com.datastax.driver.mapping.annotations.Param;
 import com.datastax.driver.mapping.annotations.Query;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * Demo for CRUD.
@@ -35,7 +38,7 @@ import com.google.common.util.concurrent.Futures;
  * @author DataStax Evangelist Team
  */
 @Repository
-public class CommentDao07_Asynchronous {
+public class CommentDao08_Asynchronous {
     
     /** Hold Connectivity to DSE. */
     protected DseSession dseSession;
@@ -49,7 +52,7 @@ public class CommentDao07_Asynchronous {
     
     /** Default Constructor. */
     @Autowired
-    public CommentDao07_Asynchronous(DseSession dseSession, MappingManager mappingManager) {
+    public CommentDao08_Asynchronous(DseSession dseSession, MappingManager mappingManager) {
         this.dseSession     = dseSession;
         this.mappingManager = mappingManager;
         prepare();
@@ -75,12 +78,14 @@ public class CommentDao07_Asynchronous {
      * INSERT ASYNC
      */
     public CompletableFuture<Void> insertCommentAsync(Comment c) {
+        
         // Create the completable future
         CompletableFuture<Void>   cfv        = new CompletableFuture<>();
         FutureCallback<ResultSet> myCallback = new FutureCallback<ResultSet>() {
             public void onFailure(Throwable ex) { cfv.completeExceptionally(ex); }
             public void onSuccess(ResultSet rs) { cfv.complete(null); } 
         };
+        
         // Create batch and execute as a callback
         BatchStatement batch = new BatchStatement();
         batch.add(mapperCommentByVideo.saveQuery(new CommentByVideo(c)));
@@ -102,12 +107,14 @@ public class CommentDao07_Asynchronous {
      * DELETE ASYNC
      */
     public CompletableFuture<Void> deleteCommentAsync(Comment c) {
+        
         // Create the completable future
         CompletableFuture<Void>   cfv        = new CompletableFuture<>();
         FutureCallback<ResultSet> myCallback = new FutureCallback<ResultSet>() {
             public void onFailure(Throwable ex) { cfv.completeExceptionally(ex); }
             public void onSuccess(ResultSet rs) { cfv.complete(null); } 
         };
+        
         // Create batch and execute as a callback
         BatchStatement batch = new BatchStatement();
         batch.add(mapperCommentByVideo.deleteQuery(new CommentByVideo(c)));
@@ -120,9 +127,21 @@ public class CommentDao07_Asynchronous {
      * READ (one)
      */
     public Optional < CommentByUser > findByCommentAndUserIds(UUID userid, UUID commentid) {
+        Statement             q   = mapperCommentByUser.getQuery(userid, commentid);
+        ResultSet             rs  = dseSession.execute(q);
+        Result<CommentByUser> res = mapperCommentByUser.map(rs);
+        return getFirstCommentIfExist(res);
+    }
+    
+    /*
+     * READ (one) ASYNC
+     */
+    public CompletableFuture< Optional < CommentByUser > >  findByCommentAndUserIdsAsync(UUID userid, UUID commentid) {
         Statement query = mapperCommentByUser.getQuery(userid, commentid);
-        Result<CommentByUser> res = mapperCommentByUser.map(dseSession.execute(query));
-        return res.iterator().hasNext() ? Optional.ofNullable(res.one()) : Optional.empty();
+        ResultSetFuture                          resFuture = dseSession.executeAsync(query);
+        ListenableFuture<Result<CommentByUser>>  future    = mapperCommentByUser.mapAsync(resFuture);
+        CompletableFuture<Result<CommentByUser>> comFuture = DseUtils.buildCompletableFuture(future);
+        return comFuture.thenApplyAsync(this::getFirstCommentIfExist);    
     }
     
     /*
@@ -131,6 +150,17 @@ public class CommentDao07_Asynchronous {
     public List < CommentByUser > findCommentsByUserId(UUID userid) {
         Statement query = mapperCommentByUser.getQuery(userid);
         return mapperCommentByUser.map(dseSession.execute(query)).all();
+    }
+    
+    /*
+     * READ (all) ASYNC
+     */
+    public CompletableFuture< List < CommentByUser > > findCommentsByUserIdAsync(UUID userid) {
+        Statement query = mapperCommentByUser.getQuery(userid);
+        ResultSetFuture                          resFuture = dseSession.executeAsync(query);
+        ListenableFuture<Result<CommentByUser>>  future    = mapperCommentByUser.mapAsync(resFuture);
+        CompletableFuture<Result<CommentByUser>> comFuture = DseUtils.buildCompletableFuture(future);
+        return comFuture.thenApplyAsync(Result::all);
     }
     
     /*
@@ -143,11 +173,20 @@ public class CommentDao07_Asynchronous {
     }
     
     /*
-     * READ (all)
+     * READ (all) 
      */
     public List < CommentByVideo > findCommentsByVideoId(UUID videoid) {
         Statement query = mapperCommentByVideo.getQuery(videoid);
         return mapperCommentByVideo.map(dseSession.execute(query)).all();
+    }
+    
+    /*
+     * READ (all) ASYNC
+     */
+    public CompletableFuture< List < CommentByVideo > > findCommentsByVideoIdAsync(UUID videoid) {
+        return DseUtils.buildCompletableFuture(mapperCommentByVideo.mapAsync(
+                                dseSession.executeAsync(mapperCommentByVideo.getQuery(videoid))))
+                       .thenApplyAsync(Result::all);
     }
     
     /*
@@ -182,6 +221,15 @@ public class CommentDao07_Asynchronous {
                "APPLY BATCH;")
         void update(@Param(COLUMN_COMMENTID) UUID commentId, @Param(COLUMN_VIDEOID) UUID videoId, 
                     @Param(COLUMN_USERID)    UUID userId,    @Param(COLUMN_COMMENT) String comment);
+    }
+    
+    /**
+     * Syntaxique Sugar 
+     * @param res
+     * @return
+     */
+    private Optional < CommentByUser > getFirstCommentIfExist(Result<CommentByUser> res) {
+        return res.iterator().hasNext() ? Optional.ofNullable(res.one()) : Optional.empty();
     }
 
 }

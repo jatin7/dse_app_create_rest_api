@@ -2,7 +2,6 @@ package com.academy.datastax.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.datastax.driver.core.PagingState;
 import com.datastax.driver.core.ResultSet;
@@ -20,7 +19,7 @@ public class ResultPage < ENTITY > {
 	private List < ENTITY > listOfResults = new ArrayList<>();
 
 	/** Custom management of paging state. */
-	private Optional<String> nextPage = Optional.empty();
+	private String nextPage = null;
 	
 	/** Requested page size. */
 	private int pageSize;
@@ -42,8 +41,9 @@ public class ResultPage < ENTITY > {
 		Result<ENTITY> results = mapper.map(rs);
 		if (null != results) {
 			listOfResults.addAll(results.all());
-			nextPage = Optional.ofNullable(
-					results.getExecutionInfo().getPagingState()).map(PagingState::toString);
+			if (null != results.getExecutionInfo().getPagingState()) {
+			    nextPage = results.getExecutionInfo().getPagingState().toString();
+			}
 		}
 	}
 	
@@ -55,10 +55,8 @@ public class ResultPage < ENTITY > {
 			sb.append("Results:");
 			sb.append(listOfResults.toString());
 		}
-		if (nextPage.isPresent()) {
-			sb.append("\n + pagingState is present : ");
-			sb.append(nextPage.get());
-		}
+		sb.append("\n + pagingState is present : ");
+		sb.append(nextPage);
 		return sb.toString();
 	}
 	
@@ -106,7 +104,7 @@ public class ResultPage < ENTITY > {
      * @return
      *       current value of 'nextPage'
      */
-    public Optional<String> getNextPage() {
+    public String getNextPage() {
         return nextPage;
     }
 
@@ -115,8 +113,14 @@ public class ResultPage < ENTITY > {
      * @param nextPage
      * 		new value for 'nextPage '
      */
-    public void setNextPage(Optional<String> nextPage) {
+    public void setNextPage(String nextPage) {
         this.nextPage = nextPage;
+    }
+    
+    public void setNextPage(PagingState state) {
+        if (state != null) {
+            setNextPage(state.toString());
+        }
     }
 
 }

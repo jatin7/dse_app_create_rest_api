@@ -35,6 +35,7 @@ public class User implements Serializable {
         this.userName = userName;
         this.lastName = lastName;
         this.useruuid = useruuid;
+        relatedResources.put("userDetails", "http://localhost:8080/api/v1/users/" + useruuid.toString());
         relatedResources.put("comments", "http://localhost:8080/api/v1/users/" + useruuid.toString() + "/comments");
     }
 

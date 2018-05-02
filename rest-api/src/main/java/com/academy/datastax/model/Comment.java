@@ -1,12 +1,11 @@
 package com.academy.datastax.model;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.UUID;
 
+import com.datastax.driver.core.utils.UUIDs;
 import com.datastax.driver.mapping.annotations.ClusteringColumn;
 import com.datastax.driver.mapping.annotations.Column;
-import com.datastax.driver.mapping.annotations.Computed;
 
 /**
  * Bean standing for comment on video.
@@ -35,14 +34,12 @@ public class Comment implements Serializable {
 
     @Column
     protected String comment;
-
-    @Computed("toTimestamp(commentid)")
-    private Date dateOfComment;
     
     /**
      * Default constructor.
      */
     public Comment() {
+        this.commentid = UUIDs.timeBased();
     }
     
     /**
@@ -106,25 +103,6 @@ public class Comment implements Serializable {
      */
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    /**
-     * Getter for attribute 'dateOfComment'.
-     *
-     * @return
-     *       current value of 'dateOfComment'
-     */
-    public Date getDateOfComment() {
-        return dateOfComment;
-    }
-
-    /**
-     * Setter for attribute 'dateOfComment'.
-     * @param dateOfComment
-     * 		new value for 'dateOfComment '
-     */
-    public void setDateOfComment(Date dateOfComment) {
-        this.dateOfComment = dateOfComment;
     }
     
     /**

@@ -1,5 +1,6 @@
 package com.academy.datastax.dao;
 
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -148,11 +149,21 @@ public class CommentDao09_Final {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Retrieving: {} comment(s)", result.getAvailableWithoutFetching());
         }
+        
         // Create result page
         ResultPage<CommentByVideo> resultPage = new ResultPage<>();
-        pageSize.ifPresent(resultPage::setPageSize);
-        resultPage.setNextPage(Optional.ofNullable(result.getExecutionInfo().getPagingState()).map(PagingState::toString));
-        resultPage.setresults(result.all());
+        if (pageSize.isPresent()) {
+            int currentlyRead = 0;
+            Iterator<CommentByVideo> videosIter = result.iterator();
+            while (!result.isFullyFetched() && currentlyRead < pageSize.get()) {
+                resultPage.getResults().add(videosIter.next());
+                currentlyRead++;
+            }
+            resultPage.setNextPage(result.getExecutionInfo().getPagingState());
+            resultPage.setPageSize(pageSize.get());
+        } else {
+            resultPage.setresults(result.all());
+        }
         return resultPage;
     }
     
@@ -175,9 +186,18 @@ public class CommentDao09_Final {
         }
         // Create result page
         ResultPage<CommentByUser> resultPage = new ResultPage<>();
-        pageSize.ifPresent(resultPage::setPageSize);
-        resultPage.setNextPage(Optional.ofNullable(result.getExecutionInfo().getPagingState()).map(PagingState::toString));
-        resultPage.setresults(result.all());
+        if (pageSize.isPresent()) {
+            int currentlyRead = 0;
+            Iterator<CommentByUser> videosIter = result.iterator();
+            while (!result.isFullyFetched() && currentlyRead < pageSize.get()) {
+                resultPage.getResults().add(videosIter.next());
+                currentlyRead++;
+            }
+            resultPage.setNextPage(result.getExecutionInfo().getPagingState());
+            resultPage.setPageSize(pageSize.get());
+        } else {
+            resultPage.setresults(result.all());
+        }
         return resultPage;
     }
     

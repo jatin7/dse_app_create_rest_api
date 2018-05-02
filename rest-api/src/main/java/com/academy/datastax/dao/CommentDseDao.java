@@ -3,6 +3,7 @@ package com.academy.datastax.dao;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -163,13 +164,25 @@ public class CommentDseDao {
         // Execute Query
         Result< CommentByVideo > result = mapperCommentByVideo.map(dseSession.execute(query));
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Retrieving: {} comment(s)", result.getAvailableWithoutFetching());
+            LOGGER.debug("Retrieving: {} comment(s) pagingState {}", 
+                    result.getAvailableWithoutFetching(),  
+                    result.getExecutionInfo().getPagingState());
         }
+        
         // Create result page
         ResultPage<CommentByVideo> resultPage = new ResultPage<>();
-        pageSize.ifPresent(resultPage::setPageSize);
-        resultPage.setNextPage(Optional.ofNullable(result.getExecutionInfo().getPagingState()).map(PagingState::toString));
-        resultPage.setresults(result.all());
+        if (pageSize.isPresent()) {
+            int currentlyRead = 0;
+            Iterator<CommentByVideo> videosIter = result.iterator();
+            while (!result.isFullyFetched() && currentlyRead < pageSize.get()) {
+                resultPage.getResults().add(videosIter.next());
+                currentlyRead++;
+            }
+            resultPage.setNextPage(result.getExecutionInfo().getPagingState());
+            resultPage.setPageSize(pageSize.get());
+        } else {
+            resultPage.setresults(result.all());
+        }
         return resultPage;
     }
     
@@ -192,9 +205,18 @@ public class CommentDseDao {
         }
         // Create result page
         ResultPage<CommentByUser> resultPage = new ResultPage<>();
-        pageSize.ifPresent(resultPage::setPageSize);
-        resultPage.setNextPage(Optional.ofNullable(result.getExecutionInfo().getPagingState()).map(PagingState::toString));
-        resultPage.setresults(result.all());
+        if (pageSize.isPresent()) {
+            int currentlyRead = 0;
+            Iterator<CommentByUser> videosIter = result.iterator();
+            while (!result.isFullyFetched() && currentlyRead < pageSize.get()) {
+                resultPage.getResults().add(videosIter.next());
+                currentlyRead++;
+            }
+            resultPage.setNextPage(result.getExecutionInfo().getPagingState());
+            resultPage.setPageSize(pageSize.get());
+        } else {
+            resultPage.setresults(result.all());
+        }
         return resultPage;
     }
     

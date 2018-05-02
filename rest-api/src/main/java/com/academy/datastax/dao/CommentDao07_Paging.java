@@ -1,5 +1,6 @@
 package com.academy.datastax.dao;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -61,19 +62,28 @@ public class CommentDao07_Paging {
      * READ (all), Paging State.
      * https://docs.datastax.com/en/developer/java-driver/3.5/manual/paging
      */
-    public ResultPage< CommentByUser > findCommentsByUserIdPageable(UUID userid, Optional<String> pagingState, int pageSize) {
+    public ResultPage< CommentByUser > findCommentsByUserIdPageable(UUID userid, Optional<String> pagingState, Optional<Integer> pageSize) {
         
         // Build Query
         Statement query = mapperCommentByUser.getQuery(userid);
-        query.setFetchSize(pageSize);
+        pageSize.ifPresent(query::setFetchSize);
         pagingState.ifPresent(ps -> query.setPagingState(PagingState.fromString(ps)));
         Result< CommentByUser > result = mapperCommentByUser.map(dseSession.execute(query));
         
         // Create result page
         ResultPage<CommentByUser> resultPage = new ResultPage<>();
-        resultPage.setPageSize(pageSize);
-        resultPage.setNextPage(Optional.ofNullable(result.getExecutionInfo().getPagingState()).map(PagingState::toString));
-        resultPage.setresults(result.all());
+        if (pageSize.isPresent()) {
+            int currentlyRead = 0;
+            Iterator<CommentByUser> videosIter = result.iterator();
+            while (!result.isFullyFetched() && currentlyRead < pageSize.get()) {
+                resultPage.getResults().add(videosIter.next());
+                currentlyRead++;
+            }
+            resultPage.setNextPage(result.getExecutionInfo().getPagingState());
+            resultPage.setPageSize(pageSize.get());
+        } else {
+            resultPage.setresults(result.all());
+        }
         return resultPage;
     }
     
@@ -89,19 +99,28 @@ public class CommentDao07_Paging {
      * READ (all), Paging State.
      * https://docs.datastax.com/en/developer/java-driver/3.5/manual/paging
      */
-    public ResultPage< CommentByVideo > findCommentsByVideoIdPageable(UUID videoid, Optional<String> pagingState, int pageSize) {
+    public ResultPage< CommentByVideo > findCommentsByVideoIdPageable(UUID videoid, Optional<String> pagingState,  Optional<Integer> pageSize) {
         
         // Build Query
         Statement query = mapperCommentByVideo.getQuery(videoid);
-        query.setFetchSize(pageSize);
+        pageSize.ifPresent(query::setFetchSize);
         pagingState.ifPresent(ps -> query.setPagingState(PagingState.fromString(ps)));
         Result< CommentByVideo > result = mapperCommentByVideo.map(dseSession.execute(query));
         
         // Create result page
         ResultPage<CommentByVideo> resultPage = new ResultPage<>();
-        resultPage.setPageSize(pageSize);
-        resultPage.setNextPage(Optional.ofNullable(result.getExecutionInfo().getPagingState()).map(PagingState::toString));
-        resultPage.setresults(result.all());
+        if (pageSize.isPresent()) {
+            int currentlyRead = 0;
+            Iterator<CommentByVideo> videosIter = result.iterator();
+            while (!result.isFullyFetched() && currentlyRead < pageSize.get()) {
+                resultPage.getResults().add(videosIter.next());
+                currentlyRead++;
+            }
+            resultPage.setNextPage(result.getExecutionInfo().getPagingState());
+            resultPage.setPageSize(pageSize.get());
+        } else {
+            resultPage.setresults(result.all());
+        }
         return resultPage;
     }
     

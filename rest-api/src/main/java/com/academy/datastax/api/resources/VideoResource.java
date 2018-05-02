@@ -18,6 +18,7 @@ import com.academy.datastax.dao.CommentDseDao;
 import com.academy.datastax.model.CommentByVideo;
 import com.academy.datastax.model.ResultPage;
 import com.academy.datastax.model.User;
+import com.academy.datastax.model.Video;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -36,10 +37,10 @@ public class VideoResource {
     
     @RequestMapping(value = "", method = GET, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get detailed information on a Video", response = User.class)
-    @ApiResponses(@ApiResponse(code = 200, message = "Get detailed information on a User"))
-    public User userDetails(@ApiParam(name="useruuid", value="Unique identifier for a user", required=true ) 
-    @PathVariable(value = "useruuid") String useruuid) {
-       return new User("John", "Doe", UUID.fromString(useruuid));
+    @ApiResponses(@ApiResponse(code = 200, message = "Get detailed information on a video"))
+    public Video videoDetails(@ApiParam(name="useruuid", value="Unique identifier for a video", required=true ) 
+    @PathVariable(value = "videouuid") String videouuid) {
+       return new Video("Sample title", UUID.fromString(videouuid));
     }
     
     @RequestMapping(value = "/comments", method = GET, produces = APPLICATION_JSON_VALUE)
@@ -52,9 +53,8 @@ public class VideoResource {
             @RequestParam("pageSize") Optional<Integer> pageSize,
             @ApiParam(name="pageState", value="Use to retrieve next pages", required=false ) 
             @RequestParam("pageState") Optional<String> pageState) {
-        LOGGER.info("Retrieving comments for a user ");
+        LOGGER.info("Retrieving comments for a video ");
         return commentDao.readVideoComments(UUID.fromString(videouuid), pageState, pageSize);
     }
-    
     
 }

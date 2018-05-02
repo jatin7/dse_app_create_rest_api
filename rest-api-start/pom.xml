@@ -11,10 +11,10 @@
 	
 	<properties>
 		<version.dse-java-driver>1.5.1</version.dse-java-driver>
+		
 		<version.spring>5.0.5.RELEASE</version.spring>
 		<version.logback>1.2.3</version.logback>
-		<version.spring-boot>1.5.12.RELEASE</version.spring-boot>
-		
+		<version.netty>4.0.56.Final</version.netty>
 		<version.jupiter-unit>5.1.0</version.jupiter-unit>
 		<version.jupiter-platform>1.1.0</version.jupiter-platform>
 	</properties>
@@ -87,15 +87,6 @@
 			<artifactId>junit-platform-console-standalone</artifactId>
 			<scope>test</scope>
 			<version>${version.jupiter-platform}</version>
-		</dependency>
-		 
-		<!-- API -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-dependencies</artifactId>
-			<version>${version.spring-boot}</version>
-			<type>pom</type>
-			<scope>import</scope>
 		</dependency>
 		
 	</dependencies>

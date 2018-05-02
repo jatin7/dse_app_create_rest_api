@@ -29,44 +29,17 @@ public class TestConnection {
     private String cassandraKeyspace;
     
     @Test
-    public void checkConnection() {
+    public void testEnvironment() throws FileNotFoundException {
         assertNotNull(cassandraKeyspace);
         assertNotNull(dseSession);
         assertEquals(cassandraKeyspace, dseSession.getLoggedKeyspace());
-    }
-    
-    @Test
-    public void select() {
-        dseSession.execute("SELECT comment FROM comments_by_user")
-                  .all().stream()
-                  .forEach(row -> System.out.println("- " + row.getString("comment")));
-    }
-    
-    @Test
-    public void testDropSchema() throws FileNotFoundException {
-        DseUtils.executeCQLFile(dseSession, "/cql/drop-schema.cql");
-    }
-    
-    @Test
-    public void testCreateSchema() throws FileNotFoundException {
-        DseUtils.executeCQLFile(dseSession, "/cql/create-schema.cql");
-    }
-    
-    @Test
-    public void testInsertWithCQL() {
-        String text = "Hello World.";
-        dseSession.execute(""
-                + "INSERT INTO comments_by_user (commentid, userid, videoid, comment) " 
-                + "VALUES (1aae5f50-445e-11e8-8977-abaff7c8fa1d, b17e0fa3-62f7-47f6-a47a-552c925d4d79, " 
-                + "        12b5b195-46d7-492a-a7ec-1909688901da,'" + text + "');");
         
-        assertEquals(text, 
-        dseSession.execute(""
-                + "SELECT * FROM comments_by_user "
-                + "WHERE commentid = 1aae5f50-445e-11e8-8977-abaff7c8fa1d "
-                + "AND userid = b17e0fa3-62f7-47f6-a47a-552c925d4d79;")
-                  .all().stream().findFirst().get().getString("comment"));
+        DseUtils.executeCQLFile(dseSession, "/cql/create-schema.cql");
+        DseUtils.executeCQLFile(dseSession, "/cql/import-data.cql");
+        
+        System.out.println("--------------------------------------------");
+        System.out.println("Congratulations you are ready to START !!  ");
+        System.out.println("--------------------------------------------");
     }
-    
   
 }

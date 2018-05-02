@@ -22,8 +22,9 @@ CREATE TABLE IF NOT EXISTS comments_by_user (
     PRIMARY KEY ((userid), commentid)
 ) WITH CLUSTERING ORDER BY (commentid DESC);
 
-
 truncate comments_by_user;
+truncate comments_by_video;
+
 
 
 

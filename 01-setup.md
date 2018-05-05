@@ -234,3 +234,6 @@ There are 2 projects in the repository :
 - In `src/test/java`, find package `com.academy.datastax` and open `TestConnection`
 - Execute Test. This test will recreate the Keyspace and import data for you.
 
+<img src="https://raw.githubusercontent.com/DataStax-Academy/tutorial-create-rest-api/master/img/eclipse-connection.png" width="500" />
+
+

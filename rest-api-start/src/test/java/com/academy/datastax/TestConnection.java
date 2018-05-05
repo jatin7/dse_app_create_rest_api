@@ -38,7 +38,7 @@ public class TestConnection {
         DseUtils.executeCQLFile(dseSession, "/cql/import-data.cql");
         
         System.out.println("--------------------------------------------");
-        System.out.println("Congratulations you are ready to START !!  ");
+        System.out.println("Congratulations you are ready to START !!   ");
         System.out.println("--------------------------------------------");
     }
   

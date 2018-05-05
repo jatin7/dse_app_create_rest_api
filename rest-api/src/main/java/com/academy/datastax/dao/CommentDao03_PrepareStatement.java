@@ -25,6 +25,8 @@ import com.datastax.driver.dse.DseSession;
 /**
  * Demo for CRUD.
  *
+ * https://docs.datastax.com/en/developer/java-driver/3.1/manual/statements/prepared/
+ *
  * @author DataStax Evangelist Team
  */
 @Repository

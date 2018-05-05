@@ -39,6 +39,9 @@ public class Comment implements Serializable {
      * Default constructor.
      */
     public Comment() {
+    }
+    
+    public void initCommentId() {
         this.commentid = UUIDs.timeBased();
     }
     

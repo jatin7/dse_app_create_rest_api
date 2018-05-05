@@ -1,5 +1,8 @@
 package com.academy.datastax.dao;
 
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -8,11 +11,14 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.academy.datastax.model.Comment;
 import com.academy.datastax.model.CommentByUser;
 import com.academy.datastax.model.CommentByVideo;
 import com.academy.datastax.model.ResultPage;
 import com.datastax.driver.core.PagingState;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.dse.DseSession;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
@@ -35,6 +41,8 @@ public class CommentDao07_Paging {
     /** Mapper to ease queries. */
     protected Mapper < CommentByUser >  mapperCommentByUser;
     protected Mapper < CommentByVideo > mapperCommentByVideo;
+    private   PreparedStatement         readAllCommentUserStatement;
+    private   PreparedStatement         readAllCommentVideoStatement;
     
     /** Default Constructor. */
     @Autowired
@@ -48,6 +56,16 @@ public class CommentDao07_Paging {
     public void prepare() {
         mapperCommentByUser  = mappingManager.mapper(CommentByUser.class);
         mapperCommentByVideo = mappingManager.mapper(CommentByVideo.class);
+        
+        // Query on Partition key only (not the whole primary key)
+        String tableCommentByUser = mapperCommentByUser.getTableMetadata().getName();
+        readAllCommentUserStatement = dseSession.prepare(select().all()
+                .from(tableCommentByUser).where(eq(Comment.COLUMN_USERID,  QueryBuilder.bindMarker())));
+
+        // Query on Partition key only (not the whole primary key)
+        String tableCommentByVideo = mapperCommentByVideo.getTableMetadata().getName();
+        readAllCommentVideoStatement = dseSession.prepare(select().all()
+                .from(tableCommentByVideo).where(eq(Comment.COLUMN_VIDEOID,  QueryBuilder.bindMarker())));
     }
     
     /*
@@ -65,11 +83,13 @@ public class CommentDao07_Paging {
     public ResultPage< CommentByUser > findCommentsByUserIdPageable(UUID userid, Optional<String> pagingState, Optional<Integer> pageSize) {
         
         // Build Query
-        Statement query = mapperCommentByUser.getQuery(userid);
+        Statement query = readAllCommentUserStatement.bind().setUUID(Comment.COLUMN_USERID, userid);
         pageSize.ifPresent(query::setFetchSize);
         pagingState.ifPresent(ps -> query.setPagingState(PagingState.fromString(ps)));
-        Result< CommentByUser > result = mapperCommentByUser.map(dseSession.execute(query));
         
+        // Execute Query
+        Result< CommentByUser > result = mapperCommentByUser.map(dseSession.execute(query));
+       
         // Create result page
         ResultPage<CommentByUser> resultPage = new ResultPage<>();
         if (pageSize.isPresent()) {
@@ -88,23 +108,17 @@ public class CommentDao07_Paging {
     }
     
     /*
-     * READ (all)
-     */
-    public List < CommentByVideo > findCommentsByVideoId(UUID videoid) {
-        Statement query = mapperCommentByVideo.getQuery(videoid);
-        return mapperCommentByVideo.map(dseSession.execute(query)).all();
-    }
-    
-    /*
      * READ (all), Paging State.
      * https://docs.datastax.com/en/developer/java-driver/3.5/manual/paging
      */
     public ResultPage< CommentByVideo > findCommentsByVideoIdPageable(UUID videoid, Optional<String> pagingState,  Optional<Integer> pageSize) {
         
         // Build Query
-        Statement query = mapperCommentByVideo.getQuery(videoid);
+        Statement query = readAllCommentVideoStatement.bind().setUUID(Comment.COLUMN_VIDEOID, videoid);
         pageSize.ifPresent(query::setFetchSize);
         pagingState.ifPresent(ps -> query.setPagingState(PagingState.fromString(ps)));
+
+        // Execute Query
         Result< CommentByVideo > result = mapperCommentByVideo.map(dseSession.execute(query));
         
         // Create result page

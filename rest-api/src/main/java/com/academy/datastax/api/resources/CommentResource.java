@@ -1,14 +1,16 @@
 package com.academy.datastax.api.resources;
 
-import static java.lang.Boolean.TRUE;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,13 +25,14 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 /**
- * Exposition as REST API.
+ * REST Resource implementing UPSERT (create/update) AND DELETE.
  *
  * @author DataStax Evangelist Team
  */
 @RestController
-@Api(value = "/api/v1/comments/{commentuuid}",  description = "CRUD operations working on comments")
-@RequestMapping("/api/v1/comments/{commentuuid}")
+@RequestMapping("/api/v1/videos/{videouid}/comments/{commentuuid}")
+@Api(value = "/api/v1/videos/{videouid}/comments/{commentuuid}",  
+     description = "CRUD operations working on comments")
 public class CommentResource {
     
     /** Holds operations agains dse. */
@@ -40,26 +43,69 @@ public class CommentResource {
         this.commentDao = dao;
     }
     
-    @RequestMapping(method = PUT, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Create or update a comment based on a given UUID", response = ResponseEntity.class)
+    /**
+     * -------------------------------------------- 
+     *                   UPSERT
+     * --------------------------------------------
+     */
+    @RequestMapping(method = PUT, 
+        consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(
+        value = "Create or update a comment based on a given UUID", 
+        response = ResponseEntity.class)
     @ApiResponses({
-            @ApiResponse(code = 400, message = "Comment uuid is blank (or), fields are not correctly filled"),
-            @ApiResponse(code = 201, message = "Comment has been created"),
-            @ApiResponse(code = 204, message = "No content, no changes made to the comment")})
-    public ResponseEntity<Boolean> upsert(@PathVariable(value = "commentuuid") String commentUuid, @RequestBody Comment comment) {
+        @ApiResponse(code = 201, message = "Comment has been created"),
+        @ApiResponse(code = 400, message = "Invalid parameters provided"),
+        @ApiResponse(code = 500, message = "Internal Error")})
+    public ResponseEntity<Boolean> upsert(
+                        @PathVariable(value = "commentuuid") String commentUuid,
+                        @PathVariable(value = "videouid")    String videoid,
+                        @RequestBody Comment comment) {
+        
+        // Parameters validation
+        Assert.hasLength(commentUuid, "Comment id is required");
+        Assert.hasLength(videoid, "Video id is required");
+        Assert.notNull(comment, "Comments object cannot be null");
+        Assert.hasLength(comment.getComment(), "Comments object cannot be null");
+        Assert.notNull(comment.getUserid(), "Userid attribute cannot be null");
+        
+        // Consistency with the provided bean
+        comment.setCommentid(UUID.fromString(commentUuid));
+        comment.setVideoid(UUID.fromString(videoid));
+        
+        // Invoke Async
         commentDao.insertComment(comment);
-        return new ResponseEntity<Boolean>(TRUE, HttpStatus.CREATED);
+        
+        // Do not wait and return CREATED
+        return new ResponseEntity<Boolean>(HttpStatus.CREATED);
     }
     
-    @SuppressWarnings("rawtypes")
-    @RequestMapping(method = DELETE)
-    @ApiOperation(value = "Delete a comment", response = ResponseEntity.class)
+    /**
+     * -------------------------------------------- 
+     *                   DELETE
+     * --------------------------------------------
+     */
+    @RequestMapping(method = DELETE,
+        consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(
+            value = "Delete a comment", 
+            response = ResponseEntity.class)
     @ApiResponses({
             @ApiResponse(code = 204, message = "No content, comment is deleted"),
-            @ApiResponse(code = 404, message = "Comment not found")
-    })
-    public ResponseEntity<?> deleteComment(@PathVariable(value = "commentuuid") String commentUUid, @RequestBody Comment comment) {
+            @ApiResponse(code = 400, message = "Invalid parameters provided"),
+            @ApiResponse(code = 404, message = "Comment not found"),
+            @ApiResponse(code = 500, message = "Internal Error")})
+    public ResponseEntity<Boolean> deleteComment(
+                    @PathVariable(value = "commentuuid") String commentUuid, 
+                    @RequestBody Comment comment) {
+        // Parameters validation
+        Assert.hasLength(commentUuid, "Comment id is required");
+        Assert.notNull(comment, "Comments object cannot be null");
+        Assert.hasLength(comment.getComment(), "Comments object cannot be null");
+        Assert.notNull(comment.getUserid(), "Userid attribute cannot be null");
+        comment.setCommentid(UUID.fromString(commentUuid));
+        
         commentDao.deleteComment(comment);
-        return new ResponseEntity(NO_CONTENT);
+        return new ResponseEntity<Boolean>(NO_CONTENT);
     }
 }

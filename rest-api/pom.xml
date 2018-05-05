@@ -99,7 +99,6 @@
 			<artifactId>spring-boot-dependencies</artifactId>
 			<version>${version.spring-boot}</version>
 			<type>pom</type>
-			<scope>import</scope>
 		</dependency>
 		
 		<dependency>
@@ -150,12 +149,12 @@
 					<dependency>
 						<groupId>org.junit.platform</groupId>
 						<artifactId>junit-platform-surefire-provider</artifactId>
-						<version>${junit-platform.version}</version>
+						<version>${version.jupiter-platform}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.junit.jupiter</groupId>
 						<artifactId>junit-jupiter-engine</artifactId>
-						<version>${junit-jupiter.version}</version>
+						<version>${version.jupiter-unit}</version>
 					</dependency>
 				</dependencies>
 			</plugin>

@@ -12,10 +12,10 @@ public class RestExceptionHandler {
     
     @ExceptionHandler(value = IllegalArgumentException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "bad request")
-    public void badRequestHandler() {
-        // Not necessary to handle this exception
-    }
+    public void badRequest() {}
     
+    @ExceptionHandler(value = RuntimeException.class)
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR, reason = "internal error")
+    public void internalError() {}
     
-
 }

@@ -72,8 +72,8 @@ public class CommentDao06_ObjectMapper {
      */
     public void deleteComment(Comment c) {
         dseSession.execute(new BatchStatement()
-                .add(mapperCommentByUser.deleteQuery(new CommentByUser(c)))
-                .add(mapperCommentByVideo.deleteQuery(new CommentByVideo(c))));
+                    .add(mapperCommentByUser.deleteQuery(new CommentByUser(c)))
+                    .add(mapperCommentByVideo.deleteQuery(new CommentByVideo(c))));
     }
     
     /*

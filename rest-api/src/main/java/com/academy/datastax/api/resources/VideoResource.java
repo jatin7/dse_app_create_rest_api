@@ -1,7 +1,9 @@
 package com.academy.datastax.api.resources;
 
+import static java.lang.Boolean.TRUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -9,12 +11,16 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.academy.datastax.dao.CommentDseDao;
+import com.academy.datastax.model.Comment;
 import com.academy.datastax.model.CommentByVideo;
 import com.academy.datastax.model.ResultPage;
 import com.academy.datastax.model.User;
@@ -57,4 +63,20 @@ public class VideoResource {
         return commentDao.readVideoComments(UUID.fromString(videouuid), pageState, pageSize);
     }
     
+    @RequestMapping(value = "/add", 
+            method = POST, 
+            produces = APPLICATION_JSON_VALUE, 
+            consumes= APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Create a comment using POST", response = ResultPage.class)
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieve comments for a dedicated video"))
+    public ResponseEntity<Boolean> createComment(@PathVariable(value = "commentuuid") String commentUuid,
+            @PathVariable(value = "videouid")    String videoid,
+            @RequestBody Comment comment) 
+    throws Exception {
+        // Creating UUID in the constructor
+        comment.initCommentId();
+        // Inserting
+        commentDao.insertComment(comment);
+        return new ResponseEntity<Boolean>(TRUE, HttpStatus.CREATED);
+    }
 }

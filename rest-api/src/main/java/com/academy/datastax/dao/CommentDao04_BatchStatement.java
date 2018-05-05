@@ -27,7 +27,8 @@ import com.datastax.driver.dse.DseSession;
 
 /**
  * Demo for CRUD.
- *
+ * https://docs.datastax.com/en/drivers/java/3.0/com/datastax/driver/core/BatchStatement.html
+ * 
  * @author DataStax Evangelist Team
  */
 @Repository

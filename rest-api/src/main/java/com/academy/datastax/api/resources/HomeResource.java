@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Landing page on '/'
+ * Landing page. Redirect to generated SWAGGER UI on '/swagger-ui.html'.
  * 
  * @author DataStax Evangelist Team
  */
@@ -15,12 +15,8 @@ public class HomeResource {
     
     @RequestMapping(value = "/", method = RequestMethod.GET, produces = "text/html")
     public String sayHello() {
-        return new StringBuilder(""
-                + "<html>"
-                + " <head>"
-                + "  <meta http-equiv=\"refresh\" content=\"0; url=swagger-ui.html\" />"
-                + " </head>"
-                + " <body/></html>").toString();
+        return new StringBuilder("<html><head><meta http-equiv=\"refresh\" "
+                + "content=\"0; url=swagger-ui.html\" /></head><body/></html>").toString();
     }
 
 }

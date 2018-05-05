@@ -14,7 +14,6 @@
 		
 		<version.spring>5.0.5.RELEASE</version.spring>
 		<version.logback>1.2.3</version.logback>
-		<version.netty>4.0.56.Final</version.netty>
 		<version.jupiter-unit>5.1.0</version.jupiter-unit>
 		<version.jupiter-platform>1.1.0</version.jupiter-platform>
 	</properties>
@@ -30,11 +29,6 @@
 		<dependency>
 			<groupId>com.datastax.dse</groupId>
 			<artifactId>dse-java-driver-mapping</artifactId>
-			<version>${version.dse-java-driver}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.datastax.dse</groupId>
-			<artifactId>dse-java-driver-extras</artifactId>
 			<version>${version.dse-java-driver}</version>
 		</dependency>
 		

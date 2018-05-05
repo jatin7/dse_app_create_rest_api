@@ -50,9 +50,11 @@ public class CommentDseDao {
     /** Hold Driver Mapper to implement ORM with Cassandra. */
     protected MappingManager mappingManager;
     
-    /** Mapper to ease queries. */
+    /** Mapper to ease queries. (single entity) */
     private Mapper < CommentByUser >  mapperCommentByUser;
     private Mapper < CommentByVideo > mapperCommentByVideo;
+    
+    /** Query with multiple results. */
     private PreparedStatement readAllCommentUserStatement;
     private PreparedStatement readAllCommentVideoStatement;
     

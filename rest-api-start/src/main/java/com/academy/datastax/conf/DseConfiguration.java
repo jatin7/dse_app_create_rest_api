@@ -23,6 +23,9 @@ import com.datastax.driver.dse.auth.DsePlainTextAuthProvider;
 @Configuration
 public class DseConfiguration {
 	
+    /*
+     * Use one Cluster instance per (physical) cluster (per application lifetime)
+     */
     @Bean
     public DseCluster dseCluster (
         @Value("${dse.cassandra.host:localhost}") String cassandraHost,
@@ -30,6 +33,9 @@ public class DseConfiguration {
         @Value("${dse.cassandra.hosts:9042}") int cassandraPort,
         @Value("${dse.cassandra.username}") Optional < String > dseUsername,
         @Value("${dse.cassandra.password}") Optional < String > dsePassword) {
+        
+        // https://www.datastax.com/dev/blog/4-simple-rules-when-using-the-datastax-drivers-for-cassandra
+        // https://docs.datastax.com/en/developer/java-driver-dse/1.6/upgrade_guide/migrating_from_astyanax/configuration/#building-the-cluster
         Builder clusterConfig = new Builder();
         clusterConfig.addContactPoint(cassandraHost);
         clusterConfig.withPort(cassandraPort);
@@ -40,10 +46,12 @@ public class DseConfiguration {
         return clusterConfig.build();
     }
     
+    /*
+     * Use at most one Session per keyspace, or use a single Session and explicitely specify the keyspace in your queries
+     */
     @Bean
-    public DseSession dseSession(
-            DseCluster dseCluster, 
-            @Value("${dse.cassandra.keyspace: demo}") String cassandraKeyspace) {
+    public DseSession dseSession(DseCluster dseCluster, 
+                                @Value("${dse.cassandra.keyspace: tuto_rest_api}") String cassandraKeyspace) {
         final DseSession session = dseCluster.connect();
         DseUtils.createKeySpaceSimpleStrategy(session, cassandraKeyspace, 3);
         return session;

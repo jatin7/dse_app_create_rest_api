@@ -1,6 +1,6 @@
 # Create a production-ready DAO and REST API for DataStax Enterprise applications
 
-*This content is provided to you by [Datastax Academy](academy.datastax.com) website.*
+*This content is provided to you by [Datastax Academy](https://academy.datastax.com/).*
 
 <img src="https://avatars0.githubusercontent.com/u/38688900?s=400&u=88d93b75d451bddc833a0f9baf41f33b511e6acb&v=4" width="100" />
 
